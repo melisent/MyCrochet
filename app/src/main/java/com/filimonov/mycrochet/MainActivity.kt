@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyCrochetTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    ProjectScreen(id = 0)
+                    ProjectScreen(id = 1)
                 }
             }
         }

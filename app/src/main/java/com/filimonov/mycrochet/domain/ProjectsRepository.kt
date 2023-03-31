@@ -1,47 +1,79 @@
 package com.filimonov.mycrochet.domain
 
-import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.ProjectLine
+import com.filimonov.mycrochet.data.db.ProjectLineEntity
+import com.filimonov.mycrochet.data.db.ProjectWithLinesEntity
+import com.filimonov.mycrochet.data.db.ProjectsDao
 import java.sql.Timestamp
-import kotlin.random.Random
 
-class ProjectsRepository {
-    private val projects = mutableListOf(
-        Project(id = 0, description = "", name = "Project 1", link = "", crochetSize = 6, lines = generateLines()),
-        Project(id = 1, description = "", name = "Project 2", link = "", crochetSize = 6, lines = generateLines()),
-        Project(id = 2, description = "", name = "Project 3", link = "", crochetSize = 6, lines = generateLines()),
-        Project(id = 3, description = "", name = "Project 4", link = "", crochetSize = 6, lines = generateLines()),
-        Project(id = 4, description = "", name = "Project 5", link = "", crochetSize = 6, lines = generateLines()),
-        Project(id = 5, description = "", name = "Project 6", link = "", crochetSize = 6, lines = generateLines())
-    )
-
-    fun getProject(id: Int): Project? {
-        return projects.find { it.id == id }
+class ProjectsRepository(private val dao: ProjectsDao) {
+    suspend fun getProject(id: Int): Project? {
+        return dao.getProjectWithLines(id)?.toUi()
     }
 
-    fun addLine(project: Project, line: ProjectLine) {
-
+    suspend fun addLine(project: Project, line: ProjectLine) {
+        dao.addLine(
+            ProjectLineEntity(
+                id = line.id,
+                projectId = project.id,
+                number = line.number,
+                name = line.name,
+                currentLoopCount = line.currentLoopCount,
+                maxLoopCount = line.maxLoopCount,
+                loopType = line.loopType,
+                crochetSize = line.crochetSize,
+                lastChange = line.lastChange.time
+            )
+        )
     }
 
-    private fun generateLines(): List<ProjectLine> {
-        return buildList {
-            repeat(Random.nextInt(1, 10)) {
-                val maxLoopCount = Random.nextInt(1, 100)
+    suspend fun increaseLoop(project: Project, line: ProjectLine) {
+        if (line.currentLoopCount < line.maxLoopCount) {
+            val entity = line.toEntity(project.id).copy(currentLoopCount = line.currentLoopCount + 1, lastChange = System.currentTimeMillis())
+            dao.updateLine(entity)
+        }
+    }
 
-                add(
-                    ProjectLine(
-                        id = it,
-                        number = it,
-                        name = "Строка ${it + 1}",
-                        currentLoopCount = Random.nextInt(maxLoopCount),
-                        maxLoopCount = maxLoopCount,
-                        loopType = LoopType.DEFAULT,
-                        crochetSize = 6,
-                        lastChange = Timestamp(System.currentTimeMillis())
-                    )
-                )
-            }
+    suspend fun decreaseLoop(project: Project, line: ProjectLine) {
+        if (line.currentLoopCount > 0) {
+            val entity = line.toEntity(project.id).copy(currentLoopCount = line.currentLoopCount - 1, lastChange = System.currentTimeMillis())
+            dao.updateLine(entity)
         }
     }
 }
+
+private fun ProjectWithLinesEntity.toUi() =
+    Project(
+        id = project.id,
+        name = project.name,
+        description = project.description,
+        link = project.link,
+        crochetSize = project.crochetSize,
+        lines = lines.map { it.toUi() }
+    )
+
+private fun ProjectLineEntity.toUi() =
+    ProjectLine(
+        id = id,
+        name = name,
+        number = number,
+        currentLoopCount = currentLoopCount,
+        maxLoopCount = maxLoopCount,
+        loopType = loopType,
+        crochetSize = crochetSize,
+        lastChange = Timestamp(lastChange)
+    )
+
+private fun ProjectLine.toEntity(projectId: Int) =
+    ProjectLineEntity(
+        id = id,
+        projectId = projectId,
+        name = name,
+        number = number,
+        currentLoopCount = currentLoopCount,
+        maxLoopCount = maxLoopCount,
+        loopType = loopType,
+        crochetSize = crochetSize,
+        lastChange = lastChange.time
+    )

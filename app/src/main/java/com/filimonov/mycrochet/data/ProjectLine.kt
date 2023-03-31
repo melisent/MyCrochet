@@ -6,9 +6,9 @@ data class ProjectLine(
     val id: Int,
     val number: Int,
     val name: String,
-    var currentLoopCount: Int = 0,
+    val currentLoopCount: Int = 0,
     val maxLoopCount: Int,
     val loopType: LoopType,
     val crochetSize: Int,
-    val lastChange: Timestamp,
+    val lastChange: Timestamp
 )

@@ -20,14 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.ProjectLine
-import com.filimonov.mycrochet.domain.ProjectsRepository
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
@@ -48,7 +45,13 @@ fun ProjectScreen(id: Int) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         Toolbar(projectName = project.name)
-        Lines(lines = lines, currentTime = currentTime, modifier = Modifier.weight(1f))
+        Lines(
+            lines = lines,
+            currentTime = currentTime,
+            increaseLoopClick = { viewModel.increaseLoop(it) },
+            decreaseLoopClick = { viewModel.decreaseLoop(it) },
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
@@ -76,16 +79,32 @@ private fun Toolbar(projectName: String) {
 }
 
 @Composable
-private fun Lines(lines: List<ProjectLine>, currentTime: Timestamp, modifier: Modifier = Modifier) {
+private fun Lines(
+    lines: List<ProjectLine>,
+    currentTime: Timestamp,
+    modifier: Modifier = Modifier,
+    increaseLoopClick: (ProjectLine) -> Unit,
+    decreaseLoopClick: (ProjectLine) -> Unit
+) {
     LazyColumn(modifier) {
         items(lines) {
-            Line(line = it, currentTime = currentTime)
+            Line(
+                line = it,
+                currentTime = currentTime,
+                increaseLoopClick = { increaseLoopClick.invoke(it) },
+                decreaseLoopClick = { decreaseLoopClick.invoke(it) }
+            )
         }
     }
 }
 
 @Composable
-private fun Line(line: ProjectLine, currentTime: Timestamp) {
+private fun Line(
+    line: ProjectLine,
+    currentTime: Timestamp,
+    increaseLoopClick: () -> Unit,
+    decreaseLoopClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,14 +121,14 @@ private fun Line(line: ProjectLine, currentTime: Timestamp) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = decreaseLoopClick,
                     content = { Icon(imageVector = Icons.Default.Add, contentDescription = null)}
                 )
 
                 Text(text = line.currentLoopCount.toString(), style = MaterialTheme.typography.bodyMedium)
 
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = increaseLoopClick,
                     content = { Icon(imageVector = Icons.Default.Add, contentDescription = null)}
                 )
             }
@@ -127,19 +146,19 @@ private fun Line(line: ProjectLine, currentTime: Timestamp) {
 @Composable
 @Preview(showBackground = true)
 private fun ProjectScreenPreview() {
-    val repository = remember { ProjectsRepository() }
-    val project = repository.getProject(0) ?: Project.Empty
-    val lines = project.lines
-
-    val timerViewModel = remember { TimerViewModel() }
-    val currentTime by timerViewModel.current.collectAsState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Toolbar(projectName = project.name)
-        Lines(lines = lines, currentTime = currentTime, modifier = Modifier.weight(1f))
-    }
+//    val repository = remember { ProjectsRepository() }
+//    val project = repository.getProject(0) ?: Project.Empty
+//    val lines = project.lines
+//
+//    val timerViewModel = remember { TimerViewModel() }
+//    val currentTime by timerViewModel.current.collectAsState()
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(MaterialTheme.colorScheme.background)
+//    ) {
+//        Toolbar(projectName = project.name)
+//        Lines(lines = lines, currentTime = currentTime, modifier = Modifier.weight(1f))
+//    }
 }
