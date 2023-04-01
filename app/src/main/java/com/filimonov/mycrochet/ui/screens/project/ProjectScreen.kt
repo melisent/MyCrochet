@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,14 +67,14 @@ private fun Toolbar(projectName: String) {
     ) {
         IconButton(
             onClick = { /*TODO*/ },
-            content = { Icon(imageVector = Icons.Default.Add, contentDescription = null) }
+            content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
         )
 
         Text(text = projectName, style = MaterialTheme.typography.bodyLarge)
 
         IconButton(
             onClick = { /*TODO*/ },
-            content = { Icon(imageVector = Icons.Default.Home, contentDescription = null) }
+            content = { Icon(imageVector = Icons.Outlined.SmartDisplay, contentDescription = null) }
         )
     }
 }
@@ -122,14 +123,14 @@ private fun Line(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(
                     onClick = decreaseLoopClick,
-                    content = { Icon(imageVector = Icons.Default.Add, contentDescription = null)}
+                    content = { Icon(imageVector = Icons.Outlined.Remove, contentDescription = null)}
                 )
 
                 Text(text = line.currentLoopCount.toString(), style = MaterialTheme.typography.bodyMedium)
 
                 IconButton(
                     onClick = increaseLoopClick,
-                    content = { Icon(imageVector = Icons.Default.Add, contentDescription = null)}
+                    content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null)}
                 )
             }
 

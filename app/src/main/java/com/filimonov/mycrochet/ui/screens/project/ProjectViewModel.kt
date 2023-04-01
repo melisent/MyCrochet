@@ -56,7 +56,7 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         // todo: if null - show error
         (repository.getProject(id) ?: Project.Empty).let {
             _project.value = it
-            _lines.value = it.lines
+            _lines.value = it.lines.reversed()
         }
     }
 }
