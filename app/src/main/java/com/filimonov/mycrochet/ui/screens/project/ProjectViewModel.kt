@@ -8,15 +8,17 @@ import com.filimonov.mycrochet.data.ProjectLine
 import com.filimonov.mycrochet.domain.ProjectsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel() {
     private val _project = MutableStateFlow(Project.Empty)
     val project = _project.asStateFlow()
 
-    private val _lines = MutableStateFlow<List<ProjectLine>>(emptyList())
-    val lines = _lines.asStateFlow()
+    var lines: StateFlow<List<ProjectLine>> = MutableStateFlow(emptyList())
 
     fun load(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -49,7 +51,6 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.increaseLoop(currentProject, line)
-                loadProjectWithLines(currentProject.id) // todo: reload only this line
             }
         }
     }
@@ -59,16 +60,17 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.decreaseLoop(currentProject, line)
-                loadProjectWithLines(currentProject.id) // todo: reload only this line
             }
         }
     }
 
     private suspend fun loadProjectWithLines(id: Int) {
         // todo: if null - show error
-        (repository.getProject(id) ?: Project.Empty).let { it ->
+        (repository.getProject(id) ?: Project.Empty).let {
             _project.value = it
-            _lines.value = it.lines.sortedBy { line -> line.number }
+            lines = repository.getProjectLinesById(it.id)
+                .map { lines -> lines.sortedByDescending { line -> line.number } }
+                .stateIn(viewModelScope)
         }
     }
 }

@@ -2,14 +2,21 @@ package com.filimonov.mycrochet.domain
 
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.ProjectLine
+import com.filimonov.mycrochet.data.db.ProjectEntity
 import com.filimonov.mycrochet.data.db.ProjectLineEntity
 import com.filimonov.mycrochet.data.db.ProjectWithLinesEntity
 import com.filimonov.mycrochet.data.db.ProjectsDao
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.sql.Timestamp
 
 class ProjectsRepository(private val dao: ProjectsDao) {
-    suspend fun getProject(id: Int): Project? {
-        return dao.getProjectWithLines(id)?.toUi()
+    suspend fun getProject(id: Int): Project? = dao.getProjectById(id)?.toUi()
+
+    fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
+        return dao.getProjectLinesById(projectId).map {
+            it.map { line -> line.toUi() }
+        }
     }
 
     suspend fun addLine(project: Project, line: ProjectLine) {
@@ -51,6 +58,16 @@ private fun ProjectWithLinesEntity.toUi() =
         link = project.link,
         crochetSize = project.crochetSize,
         lines = lines.map { it.toUi() }
+    )
+
+private fun ProjectEntity.toUi() =
+    Project(
+        id = id,
+        name = name,
+        description = description,
+        link = link,
+        crochetSize = crochetSize,
+        lines = emptyList()
     )
 
 private fun ProjectLineEntity.toUi() =

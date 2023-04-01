@@ -47,6 +47,7 @@ fun ProjectScreen(id: Int) {
 
     AddLineDialog(
         show = showAddLineDialog,
+        defaultCrochetSize = project.crochetSize,
         onCancel = { showAddLineDialog = false },
         onConfirm = { name, loopType, maxLoopCount, crochetSize ->
             viewModel.addLine(name, loopType, maxLoopCount, crochetSize)

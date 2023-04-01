@@ -21,7 +21,7 @@ fun Timestamp.getDifferenceAgo(new: Timestamp): String {
         weeks > 0 -> "$weeks weeks ago"
         days > 0 -> "$days days ago"
         hours > 0 -> "$hours hours ago"
-        minutes > 0 -> "$days minutes ago"
+        minutes > 0 -> "$minutes minutes ago"
         seconds > 0 -> "$seconds seconds ago"
         else -> "right now"
     }
