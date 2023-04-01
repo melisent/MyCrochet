@@ -23,7 +23,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                 maxLoopCount = line.maxLoopCount,
                 loopType = line.loopType,
                 crochetSize = line.crochetSize,
-                lastChange = line.lastChange.time
+                lastChange = System.currentTimeMillis()
             )
         )
     }

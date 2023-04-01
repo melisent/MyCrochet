@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,12 +43,23 @@ fun ProjectScreen(id: Int) {
 
     LaunchedEffect(id) { viewModel.load(id) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Toolbar(projectName = project.name)
+    var showAddLineDialog by remember { mutableStateOf(false) }
+
+    AddLineDialog(
+        show = showAddLineDialog,
+        onCancel = { showAddLineDialog = false },
+        onConfirm = { name, loopType, maxLoopCount, crochetSize ->
+            viewModel.addLine(name, loopType, maxLoopCount, crochetSize)
+            showAddLineDialog = false
+        }
+    )
+
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Toolbar(
+            projectName = project.name,
+            onAddLineClick = { showAddLineDialog = true }
+        )
+
         Lines(
             lines = lines,
             currentTime = currentTime,
@@ -57,16 +71,14 @@ fun ProjectScreen(id: Int) {
 }
 
 @Composable
-private fun Toolbar(projectName: String) {
+private fun Toolbar(projectName: String, onAddLineClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface)
+        modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surface)
     ) {
         IconButton(
-            onClick = { /*TODO*/ },
+            onClick = onAddLineClick,
             content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
         )
 
