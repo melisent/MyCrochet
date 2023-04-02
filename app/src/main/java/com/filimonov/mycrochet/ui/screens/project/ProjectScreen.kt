@@ -11,11 +11,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +38,7 @@ import com.filimonov.mycrochet.data.ProjectLine
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectScreen(id: Int) {
     val viewModel: ProjectViewModel by rememberViewModel()
@@ -55,19 +62,41 @@ fun ProjectScreen(id: Int) {
         }
     )
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Toolbar(
-            projectName = project.name,
-            onAddLineClick = { showAddLineDialog = true }
-        )
-
-        Lines(
-            lines = lines,
-            currentTime = currentTime,
-            increaseLoopClick = { viewModel.increaseLoop(it) },
-            decreaseLoopClick = { viewModel.decreaseLoop(it) },
-            modifier = Modifier.weight(1f)
-        )
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(text = project.name) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        content = { Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = null) }
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        content = { Icon(imageVector = Icons.Outlined.SmartDisplay, contentDescription = null) }
+                    )
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddLineDialog = true },
+                content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
+            )
+        }
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding).background(MaterialTheme.colorScheme.background)) {
+            Lines(
+                lines = lines,
+                currentTime = currentTime,
+                increaseLoopClick = { viewModel.increaseLoop(it) },
+                decreaseLoopClick = { viewModel.decreaseLoop(it) },
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
