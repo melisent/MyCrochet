@@ -11,7 +11,13 @@ import kotlinx.coroutines.flow.map
 import java.sql.Timestamp
 
 class ProjectsRepository(private val dao: ProjectsDao) {
-    suspend fun getProject(id: Int): Project? = dao.getProjectById(id)?.toUi()
+    fun getProjects(): Flow<List<Project>> {
+        return dao.getProjects().map {
+            it.map { project -> project.toUi() }
+        }
+    }
+
+    suspend fun getProjectById(id: Int): Project? = dao.getProjectById(id)?.toUi()
 
     fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
         return dao.getProjectLinesById(projectId).map {

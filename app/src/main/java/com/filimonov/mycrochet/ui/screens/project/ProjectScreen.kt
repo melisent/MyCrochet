@@ -65,7 +65,7 @@ fun ProjectScreen(id: Int) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = project.name) },
+                title = { Text(project.name) },
                 navigationIcon = {
                     IconButton(
                         onClick = { /*TODO*/ },

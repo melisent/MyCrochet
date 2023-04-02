@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.filimonov.mycrochet.ui.screens.project.ProjectScreen
+import com.filimonov.mycrochet.ui.screens.projects.ProjectsScreen
 import com.filimonov.mycrochet.ui.theme.MyCrochetTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyCrochetTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    ProjectScreen(id = 1)
+                    ProjectsScreen()
                 }
             }
         }

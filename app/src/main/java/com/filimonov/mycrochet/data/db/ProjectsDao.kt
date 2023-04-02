@@ -14,6 +14,9 @@ interface ProjectsDao {
     @Query("SELECT * FROM projectEntity WHERE id = :id")
     suspend fun getProjectWithLinesById(id: Int): ProjectWithLinesEntity?
 
+    @Query("SELECT * FROM projectEntity")
+    fun getProjects(): Flow<List<ProjectEntity>>
+
     @Query("SELECT * FROM projectEntity WHERE id = :id")
     suspend fun getProjectById(id: Int): ProjectEntity?
 

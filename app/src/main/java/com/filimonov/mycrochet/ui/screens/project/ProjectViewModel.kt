@@ -22,7 +22,7 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
     fun load(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             // todo: if null - show error
-            (repository.getProject(id) ?: Project.Empty).let {
+            (repository.getProjectById(id) ?: Project.Empty).let {
                 _project.value = it
 
                 repository.getProjectLinesById(it.id).collectLatest { lines ->
