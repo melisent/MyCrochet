@@ -5,10 +5,9 @@ data class Project(
     val name: String,
     val description: String,
     val link: String,
-    val crochetSize: Int,
-    val lines: List<ProjectLine>
+    val crochetSize: Int
 ) {
     companion object {
-        val Empty = Project(id = -1, name = "", description = "", link = "", crochetSize = 0, lines = emptyList())
+        val Empty = Project(id = -1, name = "", description = "", link = "", crochetSize = 0)
     }
 }

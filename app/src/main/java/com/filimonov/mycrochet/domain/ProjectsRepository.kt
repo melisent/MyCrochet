@@ -62,8 +62,7 @@ private fun ProjectWithLinesEntity.toUi() =
         name = project.name,
         description = project.description,
         link = project.link,
-        crochetSize = project.crochetSize,
-        lines = lines.map { it.toUi() }
+        crochetSize = project.crochetSize
     )
 
 private fun ProjectEntity.toUi() =
@@ -72,8 +71,7 @@ private fun ProjectEntity.toUi() =
         name = name,
         description = description,
         link = link,
-        crochetSize = crochetSize,
-        lines = emptyList()
+        crochetSize = crochetSize
     )
 
 private fun ProjectLineEntity.toUi() =

@@ -94,6 +94,6 @@ private fun ProjectItem(project: Project, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun ProjectItemPreview() {
-    val project = Project(0, "Test project first", "", "", 5, emptyList())
+    val project = Project(0, "Test project first", "", "", 5)
     ProjectItem(project = project, onClick = {})
 }
