@@ -1,4 +1,4 @@
-package com.filimonov.mycrochet.ui.screens.project
+package com.filimonov.mycrochet.ui.screens.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

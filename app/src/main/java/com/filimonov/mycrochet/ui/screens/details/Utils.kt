@@ -1,4 +1,4 @@
-package com.filimonov.mycrochet.ui.screens.project
+package com.filimonov.mycrochet.ui.screens.details
 
 import java.sql.Timestamp
 import java.util.Calendar

@@ -1,4 +1,4 @@
-package com.filimonov.mycrochet.ui.screens.project
+package com.filimonov.mycrochet.ui.screens.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -22,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,13 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.ProjectLine
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectScreen(projectId: Int, navController: NavHostController) {
+fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
     val viewModel: ProjectViewModel by rememberViewModel()
     val project by viewModel.project.collectAsState()
     val lines by viewModel.lines.collectAsState()
@@ -109,9 +113,9 @@ private fun Lines(
     increaseLoopClick: (ProjectLine) -> Unit,
     decreaseLoopClick: (ProjectLine) -> Unit
 ) {
-    LazyColumn(modifier) {
+    LazyColumn(modifier.then(Modifier.padding(vertical = 8.dp))) {
         items(lines) {
-            Line(
+            LineItem(
                 line = it,
                 currentTime = currentTime,
                 increaseLoopClick = { increaseLoopClick.invoke(it) },
@@ -121,67 +125,83 @@ private fun Lines(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Line(
+private fun LineItem(
     line: ProjectLine,
     currentTime: Timestamp,
     increaseLoopClick: () -> Unit,
     decreaseLoopClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp)
+    Surface(
+        onClick = { /*todo:*/ },
+        modifier = Modifier.fillMaxWidth().height(88.dp)
     ) {
-        Text(text = line.name, style = MaterialTheme.typography.bodyLarge)
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 24.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = decreaseLoopClick,
-                    content = { Icon(imageVector = Icons.Outlined.Remove, contentDescription = null)}
+            Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                Text(
+                    text = line.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(text = line.currentLoopCount.toString(), style = MaterialTheme.typography.bodyMedium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().weight(1f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = decreaseLoopClick,
+                            content = { Icon(imageVector = Icons.Outlined.Remove, contentDescription = null) }
+                        )
 
-                IconButton(
-                    onClick = increaseLoopClick,
-                    content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null)}
-                )
+                        Text(
+                            text = line.currentLoopCount.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        IconButton(
+                            onClick = increaseLoopClick,
+                            content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
+                        )
+                    }
+
+                    Text(
+                        text = line.maxLoopCount.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (line.currentLoopCount < line.maxLoopCount) {
+                    val modified = line.lastChange.getDifferenceAgo(currentTime)
+                    Text(
+                        text = "modified $modified",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Text(text = line.maxLoopCount.toString(), style = MaterialTheme.typography.bodyLarge)
-        }
-
-        if (line.currentLoopCount < line.maxLoopCount) {
-            val modified = line.lastChange.getDifferenceAgo(currentTime)
-            Text(text = "modified $modified", style = MaterialTheme.typography.bodySmall)
+            Divider(color = MaterialTheme.colorScheme.surfaceVariant)
         }
     }
 }
 
 @Composable
 @Preview(showBackground = true)
-private fun ProjectScreenPreview() {
-//    val repository = remember { ProjectsRepository() }
-//    val project = repository.getProject(0) ?: Project.Empty
-//    val lines = project.lines
-//
-//    val timerViewModel = remember { TimerViewModel() }
-//    val currentTime by timerViewModel.current.collectAsState()
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.background)
-//    ) {
-//        Toolbar(projectName = project.name)
-//        Lines(lines = lines, currentTime = currentTime, modifier = Modifier.weight(1f))
-//    }
+private fun LineItemPreview() {
+    val time = Timestamp(0)
+    val line = ProjectLine(0, 0, "first line", 0, 10, LoopType.DEFAULT, 5, time)
+
+    LineItem(
+        line = line,
+        currentTime = time,
+        increaseLoopClick = {  },
+        decreaseLoopClick = {  })
 }
