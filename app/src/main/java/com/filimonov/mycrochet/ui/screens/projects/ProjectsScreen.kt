@@ -29,12 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.Project
+import com.filimonov.mycrochet.navigateToProjectDetails
 import org.kodein.di.compose.rememberViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectsScreen() {
+fun ProjectsScreen(navController: NavHostController) {
     val viewModel: ProjectsViewModel by rememberViewModel()
     val projects by viewModel.projects.collectAsState()
 
@@ -59,18 +61,23 @@ fun ProjectsScreen() {
             )
         }
     ) { padding ->
-        Projects(projects = projects, modifier = Modifier.fillMaxSize().padding(padding))
+        Projects(
+            projects = projects,
+            onClick = { projectId -> navController.navigateToProjectDetails(projectId) },
+            modifier = Modifier.fillMaxSize().padding(padding)
+        )
     }
 }
 
 @Composable
 private fun Projects(
     projects: List<Project>,
+    onClick: (projectId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier.then(Modifier.padding(vertical = 8.dp))) {
         items(projects) {
-            ProjectItem(project = it, onClick = {})
+            ProjectItem(project = it, onClick = { onClick.invoke(it.id) })
         }
     }
 }

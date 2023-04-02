@@ -34,13 +34,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.ProjectLine
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProjectScreen(id: Int) {
+fun ProjectScreen(projectId: Int, navController: NavHostController) {
     val viewModel: ProjectViewModel by rememberViewModel()
     val project by viewModel.project.collectAsState()
     val lines by viewModel.lines.collectAsState()
@@ -48,7 +49,7 @@ fun ProjectScreen(id: Int) {
     val timerViewModel: TimerViewModel by rememberViewModel()
     val currentTime by timerViewModel.current.collectAsState()
 
-    LaunchedEffect(id) { viewModel.load(id) }
+    LaunchedEffect(projectId) { viewModel.load(projectId) }
 
     var showAddLineDialog by remember { mutableStateOf(false) }
 
@@ -68,7 +69,7 @@ fun ProjectScreen(id: Int) {
                 title = { Text(project.name) },
                 navigationIcon = {
                     IconButton(
-                        onClick = { /*TODO*/ },
+                        onClick = { navController.popBackStack() },
                         content = { Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = null) }
                     )
                 },
@@ -97,27 +98,6 @@ fun ProjectScreen(id: Int) {
                 modifier = Modifier.weight(1f)
             )
         }
-    }
-}
-
-@Composable
-private fun Toolbar(projectName: String, onAddLineClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surface)
-    ) {
-        IconButton(
-            onClick = onAddLineClick,
-            content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
-        )
-
-        Text(text = projectName, style = MaterialTheme.typography.bodyLarge)
-
-        IconButton(
-            onClick = { /*TODO*/ },
-            content = { Icon(imageVector = Icons.Outlined.SmartDisplay, contentDescription = null) }
-        )
     }
 }
 
