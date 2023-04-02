@@ -22,6 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,12 +38,23 @@ fun ProjectsScreen() {
     val viewModel: ProjectsViewModel by rememberViewModel()
     val projects by viewModel.projects.collectAsState()
 
+    var showAddProjectDialog by remember { mutableStateOf(false) }
+
+    AddProjectDialog(
+        show = showAddProjectDialog,
+        onCancel = { showAddProjectDialog = false },
+        onConfirm = { name, description, link, crochetSize ->
+            viewModel.addProject(name, description, link, crochetSize)
+            showAddProjectDialog = false
+        }
+    )
+
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text("MyCrochet") }) },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /*TODO: add project dialog*/ },
+                onClick = { showAddProjectDialog = true },
                 content = { Icon(imageVector = Icons.Outlined.Add, contentDescription = null) }
             )
         }

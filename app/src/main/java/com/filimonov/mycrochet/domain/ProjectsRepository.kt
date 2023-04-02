@@ -19,6 +19,18 @@ class ProjectsRepository(private val dao: ProjectsDao) {
 
     suspend fun getProjectById(id: Int): Project? = dao.getProjectById(id)?.toUi()
 
+    suspend fun addProject(project: Project) {
+        dao.addProject(
+            ProjectEntity(
+                id = project.id,
+                name = project.name,
+                description = project.description,
+                link = project.link,
+                crochetSize = project.crochetSize
+            )
+        )
+    }
+
     fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
         return dao.getProjectLinesById(projectId).map {
             it.map { line -> line.toUi() }
