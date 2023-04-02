@@ -10,9 +10,7 @@ data class ProjectLineEntity(
     val projectId: Int,
     val number: Int,
     val name: String,
-    val currentLoopCount: Int,
     val maxLoopCount: Int,
     val loopType: LoopType,
-    val crochetSize: Int,
-    val lastChange: Long
+    val crochetSize: Int
 )

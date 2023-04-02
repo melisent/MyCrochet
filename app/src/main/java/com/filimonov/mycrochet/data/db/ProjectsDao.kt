@@ -24,11 +24,14 @@ interface ProjectsDao {
     suspend fun addProject(projectEntity: ProjectEntity)
 
     @Query("SELECT * FROM projectLineEntity WHERE projectId = :projectId")
-    fun getProjectLinesById(projectId: Int): Flow<List<ProjectLineEntity>>
+    fun getLinesByProjectId(projectId: Int): Flow<List<LineWithHistoryEntity>>
 
     @Insert
     suspend fun addLine(line: ProjectLineEntity)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateLine(line: ProjectLineEntity)
+
+    @Insert
+    suspend fun updateLineHistory(history: LineHistoryEntity)
 }

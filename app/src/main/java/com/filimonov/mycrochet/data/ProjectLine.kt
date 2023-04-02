@@ -10,5 +10,5 @@ data class ProjectLine(
     val maxLoopCount: Int,
     val loopType: LoopType,
     val crochetSize: Int,
-    val lastChange: Timestamp = Timestamp(0)
+    val changedAt: Timestamp = Timestamp(0)
 )

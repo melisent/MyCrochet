@@ -56,7 +56,7 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         val currentProject = _project.value
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.increaseLoop(currentProject, line)
+                repository.increaseLoop(line)
             }
         }
     }
@@ -65,7 +65,7 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         val currentProject = _project.value
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.decreaseLoop(currentProject, line)
+                repository.decreaseLoop(line)
             }
         }
     }

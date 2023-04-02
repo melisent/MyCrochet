@@ -2,6 +2,7 @@ package com.filimonov.mycrochet.domain
 
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.ProjectLine
+import com.filimonov.mycrochet.data.db.LineHistoryEntity
 import com.filimonov.mycrochet.data.db.ProjectEntity
 import com.filimonov.mycrochet.data.db.ProjectLineEntity
 import com.filimonov.mycrochet.data.db.ProjectWithLinesEntity
@@ -32,8 +33,29 @@ class ProjectsRepository(private val dao: ProjectsDao) {
     }
 
     fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
-        return dao.getProjectLinesById(projectId).map {
-            it.map { line -> line.toUi() }
+        return dao.getLinesByProjectId(projectId).map { list ->
+            list.map { lineWithHistory ->
+                val line = lineWithHistory.line
+                val history = lineWithHistory.history
+
+                val (count, lastChange) =
+                    history.maxByOrNull {
+                        it.changedAt
+                    }.let {
+                        (it?.count ?: 0) to (it?.changedAt ?: 0)
+                    }
+
+                ProjectLine(
+                    id = line.id,
+                    number = line.number,
+                    name = line.name,
+                    currentLoopCount = count,
+                    maxLoopCount = line.maxLoopCount,
+                    loopType = line.loopType,
+                    crochetSize = line.crochetSize,
+                    changedAt = Timestamp(lastChange)
+                )
+            }
         }
     }
 
@@ -44,26 +66,26 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                 projectId = project.id,
                 number = line.number,
                 name = line.name,
-                currentLoopCount = line.currentLoopCount,
                 maxLoopCount = line.maxLoopCount,
                 loopType = line.loopType,
-                crochetSize = line.crochetSize,
-                lastChange = System.currentTimeMillis()
+                crochetSize = line.crochetSize
             )
         )
     }
 
-    suspend fun increaseLoop(project: Project, line: ProjectLine) {
+    suspend fun increaseLoop(line: ProjectLine) {
         if (line.currentLoopCount < line.maxLoopCount) {
-            val entity = line.toEntity(project.id).copy(currentLoopCount = line.currentLoopCount + 1, lastChange = System.currentTimeMillis())
-            dao.updateLine(entity)
+            dao.updateLineHistory(
+                LineHistoryEntity(0, line.id, line.currentLoopCount + 1, System.currentTimeMillis())
+            )
         }
     }
 
-    suspend fun decreaseLoop(project: Project, line: ProjectLine) {
+    suspend fun decreaseLoop(line: ProjectLine) {
         if (line.currentLoopCount > 0) {
-            val entity = line.toEntity(project.id).copy(currentLoopCount = line.currentLoopCount - 1, lastChange = System.currentTimeMillis())
-            dao.updateLine(entity)
+            dao.updateLineHistory(
+                LineHistoryEntity(0, line.id, line.currentLoopCount - 1, System.currentTimeMillis())
+            )
         }
     }
 }
@@ -91,11 +113,9 @@ private fun ProjectLineEntity.toUi() =
         id = id,
         name = name,
         number = number,
-        currentLoopCount = currentLoopCount,
         maxLoopCount = maxLoopCount,
         loopType = loopType,
-        crochetSize = crochetSize,
-        lastChange = Timestamp(lastChange)
+        crochetSize = crochetSize
     )
 
 private fun ProjectLine.toEntity(projectId: Int) =
@@ -104,9 +124,7 @@ private fun ProjectLine.toEntity(projectId: Int) =
         projectId = projectId,
         name = name,
         number = number,
-        currentLoopCount = currentLoopCount,
         maxLoopCount = maxLoopCount,
         loopType = loopType,
-        crochetSize = crochetSize,
-        lastChange = lastChange.time
+        crochetSize = crochetSize
     )

@@ -179,7 +179,7 @@ private fun LineItem(
                 }
 
                 if (line.currentLoopCount < line.maxLoopCount) {
-                    val modified = line.lastChange.getDifferenceAgo(currentTime)
+                    val modified = line.changedAt.getDifferenceAgo(currentTime)
                     Text(
                         text = "modified $modified",
                         style = MaterialTheme.typography.labelSmall,
