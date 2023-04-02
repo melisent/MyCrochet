@@ -40,9 +40,7 @@ fun AddProjectDialog(
                 shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(24.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
                     // headline
                     Text(
                         text = "Add project",

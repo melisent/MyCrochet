@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.ProjectLine
+import com.filimonov.mycrochet.ui.screens.details.history.LineHistoryDialog
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
@@ -56,7 +57,6 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
     LaunchedEffect(projectId) { viewModel.load(projectId) }
 
     var showAddLineDialog by remember { mutableStateOf(false) }
-
     AddLineDialog(
         show = showAddLineDialog,
         defaultCrochetSize = project.crochetSize,
@@ -65,6 +65,14 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
             viewModel.addLine(name, loopType, maxLoopCount, crochetSize)
             showAddLineDialog = false
         }
+    )
+
+    var showLineHistoryDialog by remember { mutableStateOf(false) }
+    var selectedLineId by remember { mutableStateOf(-1) }
+    LineHistoryDialog(
+        show = showLineHistoryDialog,
+        lineId = selectedLineId,
+        onCancel = { showLineHistoryDialog = false }
     )
 
     Scaffold(
@@ -97,6 +105,10 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
             Lines(
                 lines = lines,
                 currentTime = currentTime,
+                onLineClick = {
+                    selectedLineId = it.id
+                    showLineHistoryDialog = true
+                },
                 increaseLoopClick = { viewModel.increaseLoop(it) },
                 decreaseLoopClick = { viewModel.decreaseLoop(it) },
                 modifier = Modifier.weight(1f)
@@ -110,6 +122,7 @@ private fun Lines(
     lines: List<ProjectLine>,
     currentTime: Timestamp,
     modifier: Modifier = Modifier,
+    onLineClick: (ProjectLine) -> Unit,
     increaseLoopClick: (ProjectLine) -> Unit,
     decreaseLoopClick: (ProjectLine) -> Unit
 ) {
@@ -118,6 +131,7 @@ private fun Lines(
             LineItem(
                 line = it,
                 currentTime = currentTime,
+                onClick = { onLineClick.invoke(it) },
                 increaseLoopClick = { increaseLoopClick.invoke(it) },
                 decreaseLoopClick = { decreaseLoopClick.invoke(it) }
             )
@@ -130,11 +144,12 @@ private fun Lines(
 private fun LineItem(
     line: ProjectLine,
     currentTime: Timestamp,
+    onClick: () -> Unit,
     increaseLoopClick: () -> Unit,
     decreaseLoopClick: () -> Unit
 ) {
     Surface(
-        onClick = { /*todo:*/ },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(88.dp)
     ) {
         Column(
@@ -202,6 +217,8 @@ private fun LineItemPreview() {
     LineItem(
         line = line,
         currentTime = time,
+        onClick = {  },
         increaseLoopClick = {  },
-        decreaseLoopClick = {  })
+        decreaseLoopClick = {  }
+    )
 }

@@ -1,5 +1,6 @@
 package com.filimonov.mycrochet.domain
 
+import com.filimonov.mycrochet.data.LineHistory
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.ProjectLine
 import com.filimonov.mycrochet.data.db.LineHistoryEntity
@@ -33,7 +34,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
     }
 
     fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
-        return dao.getLinesByProjectId(projectId).map { list ->
+        return dao.getLinesWithHistoryByProjectId(projectId).map { list ->
             list.map { lineWithHistory ->
                 val line = lineWithHistory.line
                 val history = lineWithHistory.history
@@ -56,6 +57,12 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                     changedAt = Timestamp(lastChange)
                 )
             }
+        }
+    }
+
+    fun getLineHistoryByLineId(lineId: Int): Flow<List<LineHistory>> {
+        return dao.getLineHistoryByLineId(lineId).map { list ->
+            list.map { LineHistory(count = it.count, changedAt = Timestamp(it.changedAt)) }
         }
     }
 
