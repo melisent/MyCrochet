@@ -44,7 +44,6 @@ fun MyCrochetTheme(
 ) {
     MaterialTheme(
         colorScheme = LightColorScheme,
-        typography = Typography,
         content = content
     )
 }
