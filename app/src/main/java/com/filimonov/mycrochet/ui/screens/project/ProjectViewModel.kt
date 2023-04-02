@@ -8,21 +8,27 @@ import com.filimonov.mycrochet.data.ProjectLine
 import com.filimonov.mycrochet.domain.ProjectsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel() {
     private val _project = MutableStateFlow(Project.Empty)
     val project = _project.asStateFlow()
 
-    var lines: StateFlow<List<ProjectLine>> = MutableStateFlow(emptyList())
+    private val _lines = MutableStateFlow(emptyList<ProjectLine>())
+    var lines = _lines.asStateFlow()
 
     fun load(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            loadProjectWithLines(id)
+            // todo: if null - show error
+            (repository.getProject(id) ?: Project.Empty).let {
+                _project.value = it
+
+                repository.getProjectLinesById(it.id).collectLatest { lines ->
+                    _lines.value = lines.sortedByDescending { line -> line.number }
+                }
+            }
         }
     }
 
@@ -61,16 +67,6 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
             viewModelScope.launch(Dispatchers.IO) {
                 repository.decreaseLoop(currentProject, line)
             }
-        }
-    }
-
-    private suspend fun loadProjectWithLines(id: Int) {
-        // todo: if null - show error
-        (repository.getProject(id) ?: Project.Empty).let {
-            _project.value = it
-            lines = repository.getProjectLinesById(it.id)
-                .map { lines -> lines.sortedByDescending { line -> line.number } }
-                .stateIn(viewModelScope)
         }
     }
 }
