@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.filimonov.mycrochet.ui.screens.isPositiveFloat
 
-// todo: remove 0s from input fields
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProjectDialog(
@@ -35,7 +35,7 @@ fun AddProjectDialog(
             var name by remember { mutableStateOf("") }
             var description by remember { mutableStateOf("") }
             var link by remember { mutableStateOf("") }
-            var crochetSize by remember { mutableStateOf(0f) }
+            var crochetSize by remember { mutableStateOf("") }
 
             Card(
                 shape = MaterialTheme.shapes.extraLarge,
@@ -77,8 +77,8 @@ fun AddProjectDialog(
                     )
 
                     OutlinedTextField(
-                        value = crochetSize.toString(),
-                        onValueChange = { crochetSize = it.toFloatOrNull() ?: 0f },
+                        value = crochetSize,
+                        onValueChange = { if (it.isPositiveFloat() || it.isBlank()) crochetSize = it },
                         label = { Text(text = "Crochet size") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
@@ -87,7 +87,7 @@ fun AddProjectDialog(
                     // buttons
                     DialogButtons(
                         onCancel = onCancel,
-                        onConfirm = { onConfirm.invoke(name, description, link, crochetSize) },
+                        onConfirm = { onConfirm.invoke(name, description, link, crochetSize.toFloatOrNull() ?: 0f) },
                         confirmButtonEnabled = name.isNotBlank(),
                         modifier = Modifier.padding(top = 24.dp)
                     )

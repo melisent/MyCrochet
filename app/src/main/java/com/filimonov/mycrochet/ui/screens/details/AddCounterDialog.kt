@@ -27,8 +27,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.filimonov.mycrochet.data.LoopType
+import com.filimonov.mycrochet.ui.screens.isPositiveFloat
+import com.filimonov.mycrochet.ui.screens.isPositiveInt
 
-// todo: remove 0s from input fields
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCounterDialog(
@@ -41,16 +42,18 @@ fun AddCounterDialog(
         Dialog(onDismissRequest = onCancel) {
             var name by remember { mutableStateOf("") }
             val loopType = remember { mutableStateOf(LoopType.DEFAULT) }
-            var startLineCount by remember { mutableStateOf(0) }
-            var endLineCount by remember { mutableStateOf(0) }
-            var crochetSize by remember { mutableStateOf(defaultCrochetSize) }
+            var startLineCount by remember { mutableStateOf("") }
+            var endLineCount by remember { mutableStateOf("") }
+            var crochetSize by remember { mutableStateOf(if (defaultCrochetSize > 0) defaultCrochetSize.toString() else "") }
 
             Card(
                 shape = MaterialTheme.shapes.extraLarge,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(24.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
                 ) {
                     // headline
                     Text(
@@ -73,38 +76,58 @@ fun AddCounterDialog(
                     LoopTypeDropdown(loopType = loopType)
 
                     OutlinedTextField(
-                        value = startLineCount.toString(),
-                        onValueChange = { startLineCount = it.toIntOrNull() ?: 0 },
+                        value = startLineCount,
+                        onValueChange = { if (it.isPositiveInt() || it.isBlank()) startLineCount = it },
                         label = { Text(text = "Start line") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
+                        singleLine = true,
+                        isError = !startLineCount.isPositiveInt() && startLineCount.isNotBlank(),
+                        supportingText = {
+                            if (!startLineCount.isPositiveInt() && startLineCount.isNotBlank()) {
+                                Text(text = "Must be positive")
+                            }
+                        }
                     )
 
                     OutlinedTextField(
-                        value = endLineCount.toString(),
-                        onValueChange = { endLineCount = it.toIntOrNull() ?: 0 },
+                        value = endLineCount,
+                        onValueChange = { if (it.isPositiveInt() || it.isBlank()) endLineCount = it },
                         label = { Text(text = "End line") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        isError = endLineCount < 1,
-                        supportingText = { if (endLineCount < 1) Text(text = "Must not be empty") }
+                        isError = !endLineCount.isPositiveInt(),
+                        supportingText = {
+                            if (!endLineCount.isPositiveInt()) {
+                                Text(text = "Must not be empty")
+                            }
+                        }
                     )
 
                     OutlinedTextField(
-                        value = crochetSize.toString(),
-                        onValueChange = { crochetSize = it.toFloatOrNull() ?: 0f },
+                        value = crochetSize,
+                        onValueChange = { if (it.isPositiveFloat() || it.isBlank()) crochetSize = it },
                         label = { Text(text = "Crochet size") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        isError = crochetSize < 1,
-                        supportingText = { if (crochetSize < 1) Text(text = "Must not be empty") }
+                        isError = !crochetSize.isPositiveFloat(),
+                        supportingText = {
+                            if (!crochetSize.isPositiveFloat()) {
+                                Text(text = "Must not be empty")
+                            }
+                        }
                     )
 
                     // buttons
                     DialogButtons(
                         onCancel = onCancel,
-                        onConfirm = { onConfirm.invoke(name, loopType.value, startLineCount, endLineCount, crochetSize) },
-                        confirmButtonEnabled = (name.isNotBlank() && endLineCount > 0 && crochetSize > 0),
+                        onConfirm = {
+                            val loopTypeResult = loopType.value
+                            val startLineCountResult = startLineCount.toIntOrNull() ?: 0
+                            val endLineCountResult = endLineCount.toIntOrNull() ?: 0
+                            val crochetSizeResult = crochetSize.toFloatOrNull() ?: 0f
+                            onConfirm.invoke(name, loopTypeResult, startLineCountResult, endLineCountResult, crochetSizeResult)
+                        },
+                        confirmButtonEnabled = ((name.isNotBlank() && (endLineCount.toIntOrNull() ?: 0) > 0 && (crochetSize.toFloatOrNull() ?: 0f) > 0)),
                         modifier = Modifier.padding(top = 24.dp)
                     )
                 }
@@ -152,7 +175,9 @@ private fun DialogButtons(
     confirmButtonEnabled: Boolean = true
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().then(modifier),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(modifier),
         horizontalArrangement = Arrangement.End
     ) {
         TextButton(
