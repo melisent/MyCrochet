@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel() {
+class ProjectDetailsViewModel(private val repository: ProjectsRepository) : ViewModel() {
     private val _project = MutableStateFlow(Project.Empty)
     val project = _project.asStateFlow()
 

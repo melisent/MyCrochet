@@ -48,7 +48,7 @@ import java.sql.Timestamp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
-    val viewModel: ProjectViewModel by rememberViewModel()
+    val viewModel: ProjectDetailsViewModel by rememberViewModel()
     val project by viewModel.project.collectAsState()
     val counters by viewModel.counters.collectAsState()
 

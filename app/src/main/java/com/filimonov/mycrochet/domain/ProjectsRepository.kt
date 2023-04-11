@@ -35,15 +35,15 @@ class ProjectsRepository(private val dao: ProjectsDao) {
 
     fun getCountersById(projectId: Int): Flow<List<Counter>> {
         return dao.getCountersWithHistoryByProjectId(projectId).map { list ->
-            list.map { lineWithHistory ->
-                val counter = lineWithHistory.counter
-                val history = lineWithHistory.history
+            list.map { counterWithHistory ->
+                val counter = counterWithHistory.counter
+                val history = counterWithHistory.history
 
                 val (count, lastChange) =
                     history.maxByOrNull {
                         it.changedAt
                     }.let {
-                        (it?.count ?: 0) to (it?.changedAt ?: 0)
+                        (it?.count ?: counter.startLineCount) to (it?.changedAt ?: 0)
                     }
 
                 Counter(
@@ -91,7 +91,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
     }
 
     suspend fun decreaseCounter(counter: Counter) {
-        if (counter.currentLineCount > 0) {
+        if (counter.currentLineCount > counter.startLineCount) {
             dao.updateCounterHistory(
                 CounterHistoryEntity(0, counter.id, counter.currentLineCount - 1, System.currentTimeMillis())
             )
