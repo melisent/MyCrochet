@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.navigateToProjectDetails
+import kotlinx.collections.immutable.ImmutableList
 import org.kodein.di.compose.rememberViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +75,7 @@ fun ProjectsScreen(navController: NavHostController) {
 // todo: swipe to delete lines
 @Composable
 private fun Projects(
-    projects: List<Project>,
+    projects: ImmutableList<Project>,
     onClick: (projectId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {

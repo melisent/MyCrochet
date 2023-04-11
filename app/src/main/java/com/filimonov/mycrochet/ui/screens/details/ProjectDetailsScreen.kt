@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.Counter
 import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.ui.screens.details.history.CounterHistoryDialog
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberViewModel
 import kotlin.time.Duration.Companion.seconds
@@ -117,7 +118,7 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
 // todo: swipe to delete counters
 @Composable
 private fun Counters(
-    counters: List<Counter>,
+    counters: ImmutableList<Counter>,
     modifier: Modifier = Modifier,
     onLineClick: (Counter) -> Unit,
     increaseLoopClick: (Counter) -> Unit,

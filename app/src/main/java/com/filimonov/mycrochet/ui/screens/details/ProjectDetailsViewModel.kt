@@ -6,6 +6,9 @@ import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.Project
 import com.filimonov.mycrochet.data.Counter
 import com.filimonov.mycrochet.domain.ProjectsRepository
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +19,7 @@ class ProjectDetailsViewModel(private val repository: ProjectsRepository) : View
     private val _project = MutableStateFlow(Project.Empty)
     val project = _project.asStateFlow()
 
-    private val _counters = MutableStateFlow(emptyList<Counter>())
+    private val _counters = MutableStateFlow<ImmutableList<Counter>>(persistentListOf())
     var counters = _counters.asStateFlow()
 
     fun load(id: Int) {
@@ -26,7 +29,7 @@ class ProjectDetailsViewModel(private val repository: ProjectsRepository) : View
                 _project.value = it
 
                 repository.getCountersById(it.id).collectLatest { counterList ->
-                    _counters.value = counterList.sortedByDescending { counter -> counter.number }
+                    _counters.value = counterList.sortedByDescending { counter -> counter.number }.toImmutableList()
                 }
             }
         }
