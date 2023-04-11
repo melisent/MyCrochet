@@ -1,16 +1,15 @@
 package com.filimonov.mycrochet.domain
 
+import com.filimonov.mycrochet.data.Counter
 import com.filimonov.mycrochet.data.CounterHistory
 import com.filimonov.mycrochet.data.Project
-import com.filimonov.mycrochet.data.Counter
+import com.filimonov.mycrochet.data.db.CounterEntity
 import com.filimonov.mycrochet.data.db.CounterHistoryEntity
 import com.filimonov.mycrochet.data.db.ProjectEntity
-import com.filimonov.mycrochet.data.db.CounterEntity
 import com.filimonov.mycrochet.data.db.ProjectWithCountersEntity
 import com.filimonov.mycrochet.data.db.ProjectsDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.sql.Timestamp
 
 class ProjectsRepository(private val dao: ProjectsDao) {
     fun getProjects(): Flow<List<Project>> {
@@ -43,7 +42,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                     history.maxByOrNull {
                         it.changedAt
                     }.let {
-                        (it?.count ?: counter.startLineCount) to (it?.changedAt ?: 0)
+                        (it?.count ?: counter.startLineCount) to (it?.changedAt ?: 0L)
                     }
 
                 Counter(
@@ -55,7 +54,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                     endLineCount = counter.endLineCount,
                     loopType = counter.loopType,
                     crochetSize = counter.crochetSize,
-                    changedAt = Timestamp(lastChange)
+                    changedAt = lastChange
                 )
             }
         }
@@ -63,7 +62,7 @@ class ProjectsRepository(private val dao: ProjectsDao) {
 
     fun getCounterHistoryByCounterId(counterId: Int): Flow<List<CounterHistory>> {
         return dao.getCounterHistoryByCounterId(counterId).map { list ->
-            list.map { CounterHistory(count = it.count, changedAt = Timestamp(it.changedAt)) }
+            list.map { CounterHistory(count = it.count, changedAt = it.changedAt) }
         }
     }
 

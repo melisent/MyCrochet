@@ -17,7 +17,7 @@ class CounterHistoryViewModel(private val repository: ProjectsRepository) : View
     fun load(lineId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getCounterHistoryByCounterId(lineId).collectLatest { list ->
-                _history.value = list.sortedByDescending { it.changedAt.time }
+                _history.value = list.sortedByDescending { it.changedAt }
             }
         }
     }

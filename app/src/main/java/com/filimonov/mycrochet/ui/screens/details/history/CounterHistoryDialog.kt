@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.filimonov.mycrochet.data.CounterHistory
 import org.kodein.di.compose.rememberViewModel
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -113,23 +113,21 @@ private fun HistoryLine(counterHistory: CounterHistory) {
 }
 
 private val HistoryTimeFormatter = SimpleDateFormat("dd/MM/yy HH:mm:ss", Locale.ENGLISH)
-private fun Timestamp.format(): String = HistoryTimeFormatter.format(this)
+private fun Long.format(): String = HistoryTimeFormatter.format(Date(this))
 
 @Preview
 @Composable
 private fun LineHistoryDialogPreview() {
-    val time = Timestamp(0)
     val history = listOf(
-        CounterHistory(0, time.apply { this.time += 0 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 1 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 2 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 3 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 4 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 5 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 6 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 7 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 8 * 1000 }),
-        CounterHistory(0, time.apply { this.time += 9 * 1000 })
+        CounterHistory(0, 1000L),
+        CounterHistory(0, 2000L),
+        CounterHistory(0, 3000L),
+        CounterHistory(0, 4000L),
+        CounterHistory(0, 5000L),
+        CounterHistory(0, 6000L),
+        CounterHistory(0, 7000L),
+        CounterHistory(0, 8000L),
+        CounterHistory(0, 9000L),
     )
 
     HistoryList(list = history)

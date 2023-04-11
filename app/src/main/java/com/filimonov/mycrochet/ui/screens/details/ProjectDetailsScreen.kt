@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,12 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.Counter
+import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.ui.screens.details.history.CounterHistoryDialog
 import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberViewModel
-import java.sql.Timestamp
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,12 +123,12 @@ private fun Counters(
     increaseLoopClick: (Counter) -> Unit,
     decreaseLoopClick: (Counter) -> Unit
 ) {
-    var currentTime by remember { mutableStateOf(Timestamp(0)) }
+    var currentTime by remember { mutableStateOf(0L) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            currentTime = Timestamp(System.currentTimeMillis())
-            delay(1.seconds)
+            currentTime = System.currentTimeMillis()
+            delay(5.seconds)
         }
     }
 
@@ -151,13 +149,11 @@ private fun Counters(
 @Composable
 private fun CounterItem(
     counter: Counter,
-    currentTime: Timestamp,
+    currentTime: Long,
     onClick: () -> Unit,
     increaseLoopClick: () -> Unit,
     decreaseLoopClick: () -> Unit
 ) {
-    val showChangedAtLabel by remember { derivedStateOf { counter.currentLineCount < counter.endLineCount } }
-
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(88.dp)
@@ -203,10 +199,9 @@ private fun CounterItem(
                     )
                 }
 
-                if (showChangedAtLabel) {
-                    val modified = counter.changedAt.getDifferenceAgo(currentTime)
+                if (counter.currentLineCount < counter.endLineCount) {
                     Text(
-                        text = "modified $modified",
+                        text = counter.changedAt.getModifiedLabel(currentTime),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -221,7 +216,7 @@ private fun CounterItem(
 @Composable
 @Preview(showBackground = true)
 private fun LineItemPreview() {
-    val time = Timestamp(0)
+    val time = 0L
     val counter = Counter(
         number = 0,
         name = "first counter",
