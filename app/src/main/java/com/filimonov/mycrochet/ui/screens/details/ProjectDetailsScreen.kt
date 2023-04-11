@@ -42,8 +42,10 @@ import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.Counter
 import com.filimonov.mycrochet.ui.screens.details.history.CounterHistoryDialog
+import kotlinx.coroutines.delay
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,9 +53,6 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
     val viewModel: ProjectDetailsViewModel by rememberViewModel()
     val project by viewModel.project.collectAsState()
     val counters by viewModel.counters.collectAsState()
-
-    val timerViewModel: TimerViewModel by rememberViewModel()
-    val currentTime by timerViewModel.current.collectAsState()
 
     LaunchedEffect(projectId) { viewModel.load(projectId) }
 
@@ -105,7 +104,6 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
         Column(modifier = Modifier.fillMaxSize().padding(padding).background(MaterialTheme.colorScheme.background)) {
             Counters(
                 counters = counters,
-                currentTime = currentTime,
                 onLineClick = {
                     selectedLineId = it.id
                     showLineHistoryDialog = true
@@ -119,16 +117,23 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
 }
 
 // todo: swipe to delete counters
-//  remove timer viewmodel and count time in LaunchedEffect
 @Composable
 private fun Counters(
     counters: List<Counter>,
-    currentTime: Timestamp,
     modifier: Modifier = Modifier,
     onLineClick: (Counter) -> Unit,
     increaseLoopClick: (Counter) -> Unit,
     decreaseLoopClick: (Counter) -> Unit
 ) {
+    var currentTime by remember { mutableStateOf(Timestamp(0)) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = Timestamp(System.currentTimeMillis())
+            delay(1.seconds)
+        }
+    }
+
     LazyColumn(modifier.then(Modifier.padding(vertical = 8.dp))) {
         items(counters) {
             CounterItem(
