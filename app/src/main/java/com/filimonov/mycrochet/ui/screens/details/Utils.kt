@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import java.util.Calendar
 import java.util.GregorianCalendar
 
+// todo: fix 0 oldMillis
 fun Timestamp.getDifferenceAgo(new: Timestamp): String {
     val oldMillis = this.time
     val newMillis = new.time

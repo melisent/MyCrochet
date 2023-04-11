@@ -24,23 +24,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.filimonov.mycrochet.data.LineHistory
+import com.filimonov.mycrochet.data.CounterHistory
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun LineHistoryDialog(
+fun CounterHistoryDialog(
     show: Boolean,
-    lineId: Int,
+    counterId: Int,
     onCancel: () -> Unit,
 ) {
     if (show) {
-        val viewModel: LineHistoryViewModel by rememberViewModel()
+        val viewModel: CounterHistoryViewModel by rememberViewModel()
         val history by viewModel.history.collectAsState()
 
-        LaunchedEffect(lineId) { viewModel.load(lineId) }
+        LaunchedEffect(counterId) { viewModel.load(counterId) }
 
         Dialog(onDismissRequest = onCancel) {
             Card(
@@ -75,14 +75,14 @@ fun LineHistoryDialog(
 }
 
 @Composable
-private fun HistoryList(list: List<LineHistory>, modifier: Modifier = Modifier) {
+private fun HistoryList(list: List<CounterHistory>, modifier: Modifier = Modifier) {
     LazyColumn(modifier = modifier) {
         items(list) { HistoryLine(it) }
     }
 }
 
 @Composable
-private fun HistoryLine(lineHistory: LineHistory) {
+private fun HistoryLine(counterHistory: CounterHistory) {
     Surface(
         modifier = Modifier.fillMaxWidth().height(56.dp) // height - material 1-line list item height
     ) {
@@ -94,14 +94,14 @@ private fun HistoryLine(lineHistory: LineHistory) {
                 modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = "${lineHistory.count} loops",
+                    text = "${counterHistory.count} lines",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(end = 16.dp)
                 )
 
                 Text(
-                    text = "changed at ${lineHistory.changedAt.format()}",
+                    text = "changed at ${counterHistory.changedAt.format()}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -120,16 +120,16 @@ private fun Timestamp.format(): String = HistoryTimeFormatter.format(this)
 private fun LineHistoryDialogPreview() {
     val time = Timestamp(0)
     val history = listOf(
-        LineHistory(0, time.apply { this.time += 0 * 1000 }),
-        LineHistory(0, time.apply { this.time += 1 * 1000 }),
-        LineHistory(0, time.apply { this.time += 2 * 1000 }),
-        LineHistory(0, time.apply { this.time += 3 * 1000 }),
-        LineHistory(0, time.apply { this.time += 4 * 1000 }),
-        LineHistory(0, time.apply { this.time += 5 * 1000 }),
-        LineHistory(0, time.apply { this.time += 6 * 1000 }),
-        LineHistory(0, time.apply { this.time += 7 * 1000 }),
-        LineHistory(0, time.apply { this.time += 8 * 1000 }),
-        LineHistory(0, time.apply { this.time += 9 * 1000 })
+        CounterHistory(0, time.apply { this.time += 0 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 1 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 2 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 3 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 4 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 5 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 6 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 7 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 8 * 1000 }),
+        CounterHistory(0, time.apply { this.time += 9 * 1000 })
     )
 
     HistoryList(list = history)

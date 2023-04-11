@@ -22,19 +22,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
+// todo: remove 0s from input fields
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProjectDialog(
     show: Boolean,
     onCancel: () -> Unit,
-    onConfirm: (name: String, description: String, link: String, crochetSize: Int) -> Unit
+    onConfirm: (name: String, description: String, link: String, crochetSize: Float) -> Unit
 ) {
     if (show) {
         Dialog(onDismissRequest = onCancel) {
             var name by remember { mutableStateOf("") }
             var description by remember { mutableStateOf("") }
             var link by remember { mutableStateOf("") }
-            var crochetSize by remember { mutableStateOf(0) }
+            var crochetSize by remember { mutableStateOf(0f) }
 
             Card(
                 shape = MaterialTheme.shapes.extraLarge,
@@ -77,7 +78,7 @@ fun AddProjectDialog(
 
                     OutlinedTextField(
                         value = crochetSize.toString(),
-                        onValueChange = { crochetSize = it.toIntOrNull() ?: 0 },
+                        onValueChange = { crochetSize = it.toFloatOrNull() ?: 0f },
                         label = { Text(text = "Crochet size") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true

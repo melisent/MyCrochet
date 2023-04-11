@@ -28,19 +28,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.filimonov.mycrochet.data.LoopType
 
+// todo: remove 0s from input fields
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddLineDialog(
+fun AddCounterDialog(
     show: Boolean,
-    defaultCrochetSize: Int = 0,
+    defaultCrochetSize: Float = 0f,
     onCancel: () -> Unit,
-    onConfirm: (name: String, loopType: LoopType, maxLoopCount: Int, crochetSize: Int) -> Unit
+    onConfirm: (name: String, loopType: LoopType, startLineCount: Int, endLineCount: Int, crochetSize: Float) -> Unit
 ) {
     if (show) {
         Dialog(onDismissRequest = onCancel) {
             var name by remember { mutableStateOf("") }
             val loopType = remember { mutableStateOf(LoopType.DEFAULT) }
-            var maxLoopCount by remember { mutableStateOf(0) }
+            var startLineCount by remember { mutableStateOf(0) }
+            var endLineCount by remember { mutableStateOf(0) }
             var crochetSize by remember { mutableStateOf(defaultCrochetSize) }
 
             Card(
@@ -52,7 +54,7 @@ fun AddLineDialog(
                 ) {
                     // headline
                     Text(
-                        text = "Add line",
+                        text = "Add counter",
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -71,18 +73,26 @@ fun AddLineDialog(
                     LoopTypeDropdown(loopType = loopType)
 
                     OutlinedTextField(
-                        value = maxLoopCount.toString(),
-                        onValueChange = { maxLoopCount = it.toIntOrNull() ?: 0 },
-                        label = { Text(text = "Loop count") },
+                        value = startLineCount.toString(),
+                        onValueChange = { startLineCount = it.toIntOrNull() ?: 0 },
+                        label = { Text(text = "Start line") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = endLineCount.toString(),
+                        onValueChange = { endLineCount = it.toIntOrNull() ?: 0 },
+                        label = { Text(text = "End line") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        isError = maxLoopCount < 1,
-                        supportingText = { if (maxLoopCount < 1) Text(text = "Must not be empty") }
+                        isError = endLineCount < 1,
+                        supportingText = { if (endLineCount < 1) Text(text = "Must not be empty") }
                     )
 
                     OutlinedTextField(
                         value = crochetSize.toString(),
-                        onValueChange = { crochetSize = it.toIntOrNull() ?: 0 },
+                        onValueChange = { crochetSize = it.toFloatOrNull() ?: 0f },
                         label = { Text(text = "Crochet size") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
@@ -93,8 +103,8 @@ fun AddLineDialog(
                     // buttons
                     DialogButtons(
                         onCancel = onCancel,
-                        onConfirm = { onConfirm.invoke(name, loopType.value, maxLoopCount, crochetSize) },
-                        confirmButtonEnabled = (name.isNotBlank() && maxLoopCount > 0 && crochetSize > 0),
+                        onConfirm = { onConfirm.invoke(name, loopType.value, startLineCount, endLineCount, crochetSize) },
+                        confirmButtonEnabled = (name.isNotBlank() && endLineCount > 0 && crochetSize > 0),
                         modifier = Modifier.padding(top = 24.dp)
                     )
                 }
@@ -160,5 +170,5 @@ private fun DialogButtons(
 @Preview(showBackground = true)
 @Composable
 private fun AddLineDialogPreview() {
-    AddLineDialog(show = true, onCancel = {}, onConfirm = {_, _, _, _ -> })
+    AddCounterDialog(show = true, onCancel = {}, onConfirm = { _, _, _, _, _ -> })
 }

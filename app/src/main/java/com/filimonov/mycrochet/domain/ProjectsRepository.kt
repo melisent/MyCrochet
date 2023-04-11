@@ -1,12 +1,12 @@
 package com.filimonov.mycrochet.domain
 
-import com.filimonov.mycrochet.data.LineHistory
+import com.filimonov.mycrochet.data.CounterHistory
 import com.filimonov.mycrochet.data.Project
-import com.filimonov.mycrochet.data.ProjectLine
-import com.filimonov.mycrochet.data.db.LineHistoryEntity
+import com.filimonov.mycrochet.data.Counter
+import com.filimonov.mycrochet.data.db.CounterHistoryEntity
 import com.filimonov.mycrochet.data.db.ProjectEntity
-import com.filimonov.mycrochet.data.db.ProjectLineEntity
-import com.filimonov.mycrochet.data.db.ProjectWithLinesEntity
+import com.filimonov.mycrochet.data.db.CounterEntity
+import com.filimonov.mycrochet.data.db.ProjectWithCountersEntity
 import com.filimonov.mycrochet.data.db.ProjectsDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -33,10 +33,10 @@ class ProjectsRepository(private val dao: ProjectsDao) {
         )
     }
 
-    fun getProjectLinesById(projectId: Int): Flow<List<ProjectLine>> {
-        return dao.getLinesWithHistoryByProjectId(projectId).map { list ->
+    fun getCountersById(projectId: Int): Flow<List<Counter>> {
+        return dao.getCountersWithHistoryByProjectId(projectId).map { list ->
             list.map { lineWithHistory ->
-                val line = lineWithHistory.line
+                val counter = lineWithHistory.counter
                 val history = lineWithHistory.history
 
                 val (count, lastChange) =
@@ -46,58 +46,60 @@ class ProjectsRepository(private val dao: ProjectsDao) {
                         (it?.count ?: 0) to (it?.changedAt ?: 0)
                     }
 
-                ProjectLine(
-                    id = line.id,
-                    number = line.number,
-                    name = line.name,
-                    currentLoopCount = count,
-                    maxLoopCount = line.maxLoopCount,
-                    loopType = line.loopType,
-                    crochetSize = line.crochetSize,
+                Counter(
+                    id = counter.id,
+                    number = counter.number,
+                    name = counter.name,
+                    currentLineCount = count,
+                    startLineCount = counter.startLineCount,
+                    endLineCount = counter.endLineCount,
+                    loopType = counter.loopType,
+                    crochetSize = counter.crochetSize,
                     changedAt = Timestamp(lastChange)
                 )
             }
         }
     }
 
-    fun getLineHistoryByLineId(lineId: Int): Flow<List<LineHistory>> {
-        return dao.getLineHistoryByLineId(lineId).map { list ->
-            list.map { LineHistory(count = it.count, changedAt = Timestamp(it.changedAt)) }
+    fun getCounterHistoryByCounterId(counterId: Int): Flow<List<CounterHistory>> {
+        return dao.getCounterHistoryByCounterId(counterId).map { list ->
+            list.map { CounterHistory(count = it.count, changedAt = Timestamp(it.changedAt)) }
         }
     }
 
-    suspend fun addLine(project: Project, line: ProjectLine) {
-        dao.addLine(
-            ProjectLineEntity(
-                id = line.id,
+    suspend fun addCounter(project: Project, counter: Counter) {
+        dao.addCounter(
+            CounterEntity(
+                id = counter.id,
                 projectId = project.id,
-                number = line.number,
-                name = line.name,
-                maxLoopCount = line.maxLoopCount,
-                loopType = line.loopType,
-                crochetSize = line.crochetSize
+                number = counter.number,
+                name = counter.name,
+                startLineCount = counter.startLineCount,
+                endLineCount = counter.endLineCount,
+                loopType = counter.loopType,
+                crochetSize = counter.crochetSize
             )
         )
     }
 
-    suspend fun increaseLoop(line: ProjectLine) {
-        if (line.currentLoopCount < line.maxLoopCount) {
-            dao.updateLineHistory(
-                LineHistoryEntity(0, line.id, line.currentLoopCount + 1, System.currentTimeMillis())
+    suspend fun increaseCounter(counter: Counter) {
+        if (counter.currentLineCount < counter.endLineCount) {
+            dao.updateCounterHistory(
+                CounterHistoryEntity(0, counter.id, counter.currentLineCount + 1, System.currentTimeMillis())
             )
         }
     }
 
-    suspend fun decreaseLoop(line: ProjectLine) {
-        if (line.currentLoopCount > 0) {
-            dao.updateLineHistory(
-                LineHistoryEntity(0, line.id, line.currentLoopCount - 1, System.currentTimeMillis())
+    suspend fun decreaseCounter(counter: Counter) {
+        if (counter.currentLineCount > 0) {
+            dao.updateCounterHistory(
+                CounterHistoryEntity(0, counter.id, counter.currentLineCount - 1, System.currentTimeMillis())
             )
         }
     }
 }
 
-private fun ProjectWithLinesEntity.toUi() =
+private fun ProjectWithCountersEntity.toUi() =
     Project(
         id = project.id,
         name = project.name,
@@ -115,23 +117,25 @@ private fun ProjectEntity.toUi() =
         crochetSize = crochetSize
     )
 
-private fun ProjectLineEntity.toUi() =
-    ProjectLine(
+private fun CounterEntity.toUi() =
+    Counter(
         id = id,
         name = name,
         number = number,
-        maxLoopCount = maxLoopCount,
+        startLineCount = startLineCount,
+        endLineCount = endLineCount,
         loopType = loopType,
         crochetSize = crochetSize
     )
 
-private fun ProjectLine.toEntity(projectId: Int) =
-    ProjectLineEntity(
+private fun Counter.toEntity(projectId: Int) =
+    CounterEntity(
         id = id,
         projectId = projectId,
         name = name,
         number = number,
-        maxLoopCount = maxLoopCount,
+        startLineCount = startLineCount,
+        endLineCount = endLineCount,
         loopType = loopType,
         crochetSize = crochetSize
     )

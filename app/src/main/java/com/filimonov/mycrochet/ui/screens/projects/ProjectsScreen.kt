@@ -71,6 +71,7 @@ fun ProjectsScreen(navController: NavHostController) {
     }
 }
 
+// todo: swipe to delete lines
 @Composable
 private fun Projects(
     projects: List<Project>,
@@ -84,6 +85,7 @@ private fun Projects(
     }
 }
 
+// todo: show description (max 2 lines)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectItem(project: Project, onClick: () -> Unit) {
@@ -120,6 +122,6 @@ private fun ProjectItem(project: Project, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun ProjectItemPreview() {
-    val project = Project(0, "Test project first", "", "", 5)
+    val project = Project(0, "Test project first", "", "", 5f)
     ProjectItem(project = project, onClick = {})
 }

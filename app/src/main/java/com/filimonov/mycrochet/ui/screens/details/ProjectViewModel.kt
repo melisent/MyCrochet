@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.filimonov.mycrochet.data.LoopType
 import com.filimonov.mycrochet.data.Project
-import com.filimonov.mycrochet.data.ProjectLine
+import com.filimonov.mycrochet.data.Counter
 import com.filimonov.mycrochet.domain.ProjectsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +16,8 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
     private val _project = MutableStateFlow(Project.Empty)
     val project = _project.asStateFlow()
 
-    private val _lines = MutableStateFlow(emptyList<ProjectLine>())
-    var lines = _lines.asStateFlow()
+    private val _counters = MutableStateFlow(emptyList<Counter>())
+    var counters = _counters.asStateFlow()
 
     fun load(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -25,25 +25,25 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
             (repository.getProjectById(id) ?: Project.Empty).let {
                 _project.value = it
 
-                repository.getProjectLinesById(it.id).collectLatest { lines ->
-                    _lines.value = lines.sortedByDescending { line -> line.number }
+                repository.getCountersById(it.id).collectLatest { counterList ->
+                    _counters.value = counterList.sortedByDescending { counter -> counter.number }
                 }
             }
         }
     }
 
-    fun addLine(name: String, loopType: LoopType, maxLoopCount: Int, crochetSize: Int) {
+    fun addCounter(name: String, loopType: LoopType, startLineCount: Int, endLineCount: Int, crochetSize: Float) {
         val currentProject = _project.value
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.addLine(
+                repository.addCounter(
                     project = currentProject,
-                    line = ProjectLine(
-                        id = 0,
-                        number = lines.value.size,
+                    counter = Counter(
+                        number = counters.value.size,
                         name = name,
-                        currentLoopCount = 0,
-                        maxLoopCount = maxLoopCount,
+                        currentLineCount = startLineCount,
+                        startLineCount = startLineCount,
+                        endLineCount = endLineCount,
                         loopType = loopType,
                         crochetSize = crochetSize
                     )
@@ -52,20 +52,20 @@ class ProjectViewModel(private val repository: ProjectsRepository) : ViewModel()
         }
     }
 
-    fun increaseLoop(line: ProjectLine) {
+    fun increaseCounter(counter: Counter) {
         val currentProject = _project.value
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.increaseLoop(line)
+                repository.increaseCounter(counter)
             }
         }
     }
 
-    fun decreaseLoop(line: ProjectLine) {
+    fun decreaseCounter(counter: Counter) {
         val currentProject = _project.value
         if (currentProject != Project.Empty) {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.decreaseLoop(line)
+                repository.decreaseCounter(counter)
             }
         }
     }

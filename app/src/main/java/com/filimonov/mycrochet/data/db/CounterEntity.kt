@@ -5,12 +5,13 @@ import androidx.room.PrimaryKey
 import com.filimonov.mycrochet.data.LoopType
 
 @Entity
-data class ProjectLineEntity(
+data class CounterEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val projectId: Int,
     val number: Int,
     val name: String,
-    val maxLoopCount: Int,
+    val startLineCount: Int,
+    val endLineCount: Int,
     val loopType: LoopType,
-    val crochetSize: Int
+    val crochetSize: Float
 )

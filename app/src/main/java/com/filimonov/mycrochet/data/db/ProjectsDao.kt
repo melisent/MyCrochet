@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface ProjectsDao {
     @Transaction
     @Query("SELECT * FROM projectEntity WHERE id = :id")
-    suspend fun getProjectWithLinesById(id: Int): ProjectWithLinesEntity?
+    suspend fun getProjectWithCountersById(id: Int): ProjectWithCountersEntity?
 
     @Query("SELECT * FROM projectEntity")
     fun getProjects(): Flow<List<ProjectEntity>>
@@ -21,20 +21,21 @@ interface ProjectsDao {
     suspend fun getProjectById(id: Int): ProjectEntity?
 
     @Insert
-    suspend fun addProject(projectEntity: ProjectEntity)
+    suspend fun addProject(project: ProjectEntity)
 
-    @Query("SELECT * FROM projectLineEntity WHERE projectId = :projectId")
-    fun getLinesWithHistoryByProjectId(projectId: Int): Flow<List<LineWithHistoryEntity>>
+    @Transaction
+    @Query("SELECT * FROM counterEntity WHERE projectId = :projectId")
+    fun getCountersWithHistoryByProjectId(projectId: Int): Flow<List<CounterWithHistoryEntity>>
 
-    @Query("SELECT * FROM lineHistoryEntity WHERE lineId = :lineId")
-    fun getLineHistoryByLineId(lineId: Int): Flow<List<LineHistoryEntity>>
+    @Query("SELECT * FROM counterHistoryEntity WHERE counterId = :counterId")
+    fun getCounterHistoryByCounterId(counterId: Int): Flow<List<CounterHistoryEntity>>
 
     @Insert
-    suspend fun addLine(line: ProjectLineEntity)
+    suspend fun addCounter(counter: CounterEntity)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun updateLine(line: ProjectLineEntity)
+    suspend fun updateCounter(counter: CounterEntity)
 
     @Insert
-    suspend fun updateLineHistory(history: LineHistoryEntity)
+    suspend fun updateCounterHistory(history: CounterHistoryEntity)
 }

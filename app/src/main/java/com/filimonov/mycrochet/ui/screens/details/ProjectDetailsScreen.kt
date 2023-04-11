@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,8 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.filimonov.mycrochet.data.LoopType
-import com.filimonov.mycrochet.data.ProjectLine
-import com.filimonov.mycrochet.ui.screens.details.history.LineHistoryDialog
+import com.filimonov.mycrochet.data.Counter
+import com.filimonov.mycrochet.ui.screens.details.history.CounterHistoryDialog
 import org.kodein.di.compose.rememberViewModel
 import java.sql.Timestamp
 
@@ -49,7 +50,7 @@ import java.sql.Timestamp
 fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
     val viewModel: ProjectViewModel by rememberViewModel()
     val project by viewModel.project.collectAsState()
-    val lines by viewModel.lines.collectAsState()
+    val counters by viewModel.counters.collectAsState()
 
     val timerViewModel: TimerViewModel by rememberViewModel()
     val currentTime by timerViewModel.current.collectAsState()
@@ -57,21 +58,21 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
     LaunchedEffect(projectId) { viewModel.load(projectId) }
 
     var showAddLineDialog by remember { mutableStateOf(false) }
-    AddLineDialog(
+    AddCounterDialog(
         show = showAddLineDialog,
         defaultCrochetSize = project.crochetSize,
         onCancel = { showAddLineDialog = false },
-        onConfirm = { name, loopType, maxLoopCount, crochetSize ->
-            viewModel.addLine(name, loopType, maxLoopCount, crochetSize)
+        onConfirm = { name, loopType, startLineCount, endLineCount, crochetSize ->
+            viewModel.addCounter(name, loopType, startLineCount, endLineCount, crochetSize)
             showAddLineDialog = false
         }
     )
 
     var showLineHistoryDialog by remember { mutableStateOf(false) }
     var selectedLineId by remember { mutableStateOf(-1) }
-    LineHistoryDialog(
+    CounterHistoryDialog(
         show = showLineHistoryDialog,
-        lineId = selectedLineId,
+        counterId = selectedLineId,
         onCancel = { showLineHistoryDialog = false }
     )
 
@@ -102,34 +103,36 @@ fun ProjectDetailsScreen(projectId: Int, navController: NavHostController) {
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).background(MaterialTheme.colorScheme.background)) {
-            Lines(
-                lines = lines,
+            Counters(
+                counters = counters,
                 currentTime = currentTime,
                 onLineClick = {
                     selectedLineId = it.id
                     showLineHistoryDialog = true
                 },
-                increaseLoopClick = { viewModel.increaseLoop(it) },
-                decreaseLoopClick = { viewModel.decreaseLoop(it) },
+                increaseLoopClick = { viewModel.increaseCounter(it) },
+                decreaseLoopClick = { viewModel.decreaseCounter(it) },
                 modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
+// todo: swipe to delete counters
+//  remove timer viewmodel and count time in LaunchedEffect
 @Composable
-private fun Lines(
-    lines: List<ProjectLine>,
+private fun Counters(
+    counters: List<Counter>,
     currentTime: Timestamp,
     modifier: Modifier = Modifier,
-    onLineClick: (ProjectLine) -> Unit,
-    increaseLoopClick: (ProjectLine) -> Unit,
-    decreaseLoopClick: (ProjectLine) -> Unit
+    onLineClick: (Counter) -> Unit,
+    increaseLoopClick: (Counter) -> Unit,
+    decreaseLoopClick: (Counter) -> Unit
 ) {
     LazyColumn(modifier.then(Modifier.padding(vertical = 8.dp))) {
-        items(lines) {
-            LineItem(
-                line = it,
+        items(counters) {
+            CounterItem(
+                counter = it,
                 currentTime = currentTime,
                 onClick = { onLineClick.invoke(it) },
                 increaseLoopClick = { increaseLoopClick.invoke(it) },
@@ -141,13 +144,15 @@ private fun Lines(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LineItem(
-    line: ProjectLine,
+private fun CounterItem(
+    counter: Counter,
     currentTime: Timestamp,
     onClick: () -> Unit,
     increaseLoopClick: () -> Unit,
     decreaseLoopClick: () -> Unit
 ) {
+    val showChangedAtLabel by remember { derivedStateOf { counter.currentLineCount < counter.endLineCount } }
+
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(88.dp)
@@ -158,7 +163,7 @@ private fun LineItem(
         ) {
             Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
                 Text(
-                    text = line.name,
+                    text = counter.name,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -175,7 +180,7 @@ private fun LineItem(
                         )
 
                         Text(
-                            text = line.currentLoopCount.toString(),
+                            text = counter.currentLineCount.toString(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -187,14 +192,14 @@ private fun LineItem(
                     }
 
                     Text(
-                        text = line.maxLoopCount.toString(),
+                        text = counter.endLineCount.toString(),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                if (line.currentLoopCount < line.maxLoopCount) {
-                    val modified = line.changedAt.getDifferenceAgo(currentTime)
+                if (showChangedAtLabel) {
+                    val modified = counter.changedAt.getDifferenceAgo(currentTime)
                     Text(
                         text = "modified $modified",
                         style = MaterialTheme.typography.labelSmall,
@@ -212,10 +217,19 @@ private fun LineItem(
 @Preview(showBackground = true)
 private fun LineItemPreview() {
     val time = Timestamp(0)
-    val line = ProjectLine(0, 0, "first line", 0, 10, LoopType.DEFAULT, 5, time)
+    val counter = Counter(
+        number = 0,
+        name = "first counter",
+        currentLineCount = 0,
+        startLineCount = 0,
+        endLineCount = 10,
+        loopType = LoopType.DEFAULT,
+        crochetSize = 5f,
+        changedAt = time
+    )
 
-    LineItem(
-        line = line,
+    CounterItem(
+        counter = counter,
         currentTime = time,
         onClick = {  },
         increaseLoopClick = {  },
